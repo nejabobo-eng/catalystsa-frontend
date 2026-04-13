@@ -1,6 +1,13 @@
 'use client'
 
+import { addToCart } from '../lib/cart'
+
 export default function ProductCard({ product }) {
+  function handleAddToCart() {
+    addToCart(product)
+    alert(`✅ ${product.name} added to cart!`)
+  }
+
   return (
     <div className="bg-white rounded-lg shadow hover:shadow-lg transition border border-gray-200">
       <div className="relative w-full h-48 bg-gray-200 rounded-t-lg overflow-hidden">
@@ -26,6 +33,7 @@ export default function ProductCard({ product }) {
         <div className="flex justify-between items-center">
           <span className="text-2xl font-bold text-green-600">R{product.price}</span>
           <button
+            onClick={handleAddToCart}
             disabled={!product.in_stock}
             className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white px-4 py-2 rounded font-medium transition"
           >

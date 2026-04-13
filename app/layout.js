@@ -11,10 +11,17 @@ export default function RootLayout({ children }) {
       <body className="bg-gray-50">
         <nav className="bg-white shadow">
           <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-            <h1 className="text-2xl font-bold text-black">CatalystSA</h1>
-            <a href="/admin" className="text-blue-600 hover:text-blue-800">
-              Admin
+            <a href="/" className="text-2xl font-bold text-black hover:text-gray-700">
+              CatalystSA
             </a>
+            <div className="flex gap-4 items-center">
+              <a href="/cart" className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded font-medium">
+                🛒 Cart
+              </a>
+              <a href="/admin" className="text-gray-600 hover:text-gray-900">
+                Admin
+              </a>
+            </div>
           </div>
         </nav>
         {children}
