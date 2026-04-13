@@ -1,12 +1,14 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { getCart, removeFromCart, updateQuantity, getCartTotal } from '../../lib/cart'
+import { getCart, removeFromCart, updateQuantity, getCartTotal, clearCart } from '../../lib/cart'
+import { createCheckout } from '../../lib/api'
 import Link from 'next/link'
 
 export default function CartPage() {
   const [cart, setCart] = useState([])
   const [total, setTotal] = useState(0)
+  const [loading, setLoading] = useState(false)
 
   useEffect(() => {
     loadCart()
@@ -26,6 +28,28 @@ export default function CartPage() {
   function handleQuantityChange(id, newQuantity) {
     updateQuantity(id, newQuantity)
     loadCart()
+  }
+
+  async function handleCheckout() {
+    setLoading(true)
+    try {
+      const baseUrl = window.location.origin
+      const checkoutData = await createCheckout(
+        total,
+        `${baseUrl}/success`,
+        `${baseUrl}/cart`
+      )
+
+      // Redirect to Yoco payment page
+      if (checkoutData.redirectUrl) {
+        window.location.href = checkoutData.redirectUrl
+      } else {
+        alert('Error: Could not create checkout')
+      }
+    } catch (error) {
+      alert(`Checkout failed: ${error.message}`)
+      setLoading(false)
+    }
   }
 
   if (cart.length === 0) {
@@ -97,8 +121,12 @@ export default function CartPage() {
           <span className="text-3xl font-bold text-green-600">R{total}</span>
         </div>
 
-        <button className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg text-lg">
-          Proceed to Checkout
+        <button
+          onClick={handleCheckout}
+          disabled={loading}
+          className="w-full bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white font-bold py-3 px-6 rounded-lg text-lg"
+        >
+          {loading ? 'Processing...' : 'Proceed to Checkout'}
         </button>
 
         <Link href="/" className="block text-center text-blue-600 hover:text-blue-800 mt-4">
