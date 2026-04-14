@@ -27,12 +27,14 @@ export default function SuccessContent() {
       // Normalize email for API call
       const normalizedEmail = email.trim().toLowerCase()
 
-      const res = await fetch(`https://catalystsa.onrender.com/yoco/orders/${normalizedEmail}`, {
+      const res = await fetch(`https://catalystsa.onrender.com/public/orders/${normalizedEmail}`, {
         cache: 'no-store',
         next: { revalidate: 0 }
       })
       if (res.ok) {
-        const orders = await res.json()
+        const response = await res.json()
+        // New response shape: {email, orders: [...]}
+        const orders = response.orders || []
         if (orders.length > 0) {
           // Get the most recent order
           setOrderData(orders[0])

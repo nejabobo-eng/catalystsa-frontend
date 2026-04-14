@@ -31,7 +31,7 @@ export default function OrdersContent() {
       // Normalize email
       const normalizedEmail = emailToFetch.trim().toLowerCase()
 
-      const res = await fetch(`${API_URL}/yoco/orders/${normalizedEmail}`, {
+      const res = await fetch(`${API_URL}/public/orders/${normalizedEmail}`, {
         cache: 'no-store',
         next: { revalidate: 0 }
       })
@@ -41,7 +41,8 @@ export default function OrdersContent() {
       }
 
       const data = await res.json()
-      setOrders(data)
+      // New response shape: {email, orders: [...]}
+      setOrders(data.orders || [])
     } catch (err) {
       setError(`Could not find orders: ${err.message}`)
       setOrders([])
