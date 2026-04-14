@@ -9,6 +9,7 @@ export default function CartPage() {
   const [cart, setCart] = useState([])
   const [total, setTotal] = useState(0)
   const [loading, setLoading] = useState(false)
+  const [email, setEmail] = useState('')
 
   useEffect(() => {
     loadCart()
@@ -31,13 +32,19 @@ export default function CartPage() {
   }
 
   async function handleCheckout() {
+    if (!email.trim()) {
+      alert('Please enter your email address')
+      return
+    }
+
     setLoading(true)
     try {
       const baseUrl = window.location.origin
       const checkoutData = await createCheckout(
         total,
-        `${baseUrl}/success`,
-        `${baseUrl}/cart`
+        `${baseUrl}/success?email=${encodeURIComponent(email)}`,
+        `${baseUrl}/cart`,
+        email
       )
 
       // Redirect to Yoco payment page
@@ -116,6 +123,18 @@ export default function CartPage() {
       </div>
 
       <div className="bg-white rounded-lg shadow mt-6 p-6">
+        <div className="mb-4">
+          <label className="block text-sm font-semibold text-gray-700 mb-2">Email Address</label>
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="your.email@example.com"
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-600"
+          />
+          <p className="text-xs text-gray-500 mt-1">We'll use this to track your order</p>
+        </div>
+
         <div className="flex justify-between items-center mb-4">
           <span className="text-xl font-semibold">Total:</span>
           <span className="text-3xl font-bold text-green-600">R{total}</span>
