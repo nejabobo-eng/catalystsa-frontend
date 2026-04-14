@@ -24,7 +24,10 @@ export default function SuccessContent() {
 
   async function fetchLatestOrder() {
     try {
-      const res = await fetch(`https://catalystsa.onrender.com/yoco/orders/by-email/${email}`, {
+      // Normalize email for API call
+      const normalizedEmail = email.trim().toLowerCase()
+
+      const res = await fetch(`https://catalystsa.onrender.com/yoco/orders/${normalizedEmail}`, {
         cache: 'no-store',
         next: { revalidate: 0 }
       })

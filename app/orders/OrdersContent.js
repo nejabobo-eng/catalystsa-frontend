@@ -28,11 +28,14 @@ export default function OrdersContent() {
     setSearched(true)
 
     try {
-      const res = await fetch(`${API_URL}/yoco/orders/${emailToFetch}`, {
+      // Normalize email
+      const normalizedEmail = emailToFetch.trim().toLowerCase()
+
+      const res = await fetch(`${API_URL}/yoco/orders/${normalizedEmail}`, {
         cache: 'no-store',
         next: { revalidate: 0 }
       })
-      
+
       if (!res.ok) {
         throw new Error('Failed to fetch orders')
       }
