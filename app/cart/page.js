@@ -1,15 +1,26 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { getCart, removeFromCart, updateQuantity, getCartTotal, clearCart } from '../../lib/cart'
+import { getCart, removeFromCart, updateQuantity, getCartTotal } from '../../lib/cart'
 import { createCheckout } from '../../lib/api'
 import Link from 'next/link'
 
+const DELIVERY_FEE_BASE = 75
+const DELIVERY_FEE_PERCENT = 0.10
+
 export default function CartPage() {
   const [cart, setCart] = useState([])
-  const [total, setTotal] = useState(0)
+  const [subtotal, setSubtotal] = useState(0)
+  const [deliveryFee, setDeliveryFee] = useState(0)
   const [loading, setLoading] = useState(false)
+
+  // Customer information
+  const [name, setName] = useState('')
   const [email, setEmail] = useState('')
+  const [phone, setPhone] = useState('')
+  const [address, setAddress] = useState('')
+  const [city, setCity] = useState('')
+  const [postalCode, setPostalCode] = useState('')
 
   useEffect(() => {
     loadCart()
@@ -18,7 +29,12 @@ export default function CartPage() {
   function loadCart() {
     const cartItems = getCart()
     setCart(cartItems)
-    setTotal(getCartTotal())
+    const cartTotal = getCartTotal()
+    setSubtotal(cartTotal)
+
+    // Calculate delivery fee: max(75, subtotal * 0.10)
+    const calculated = Math.max(DELIVERY_FEE_BASE, cartTotal * DELIVERY_FEE_PERCENT)
+    setDeliveryFee(calculated)
   }
 
   function handleRemove(id) {
@@ -31,20 +47,46 @@ export default function CartPage() {
     loadCart()
   }
 
+  function validateForm() {
+    const errors = []
+    if (!name.trim()) errors.push('Name is required')
+    if (!email.trim()) errors.push('Email is required')
+    if (!phone.trim()) errors.push('Phone is required')
+    if (!address.trim()) errors.push('Street address is required')
+    if (!city.trim()) errors.push('City is required')
+    if (!postalCode.trim()) errors.push('Postal code is required')
+
+    if (errors.length > 0) {
+      alert('Please fill in all required fields:\n' + errors.join('\n'))
+      return false
+    }
+    return true
+  }
+
   async function handleCheckout() {
-    if (!email.trim()) {
-      alert('Please enter your email address')
+    if (!validateForm()) {
       return
     }
 
     setLoading(true)
     try {
       const baseUrl = window.location.origin
+      const total = subtotal + deliveryFee
+
       const checkoutData = await createCheckout(
         total,
         `${baseUrl}/success?email=${encodeURIComponent(email)}`,
         `${baseUrl}/cart`,
-        email
+        email,
+        {
+          name,
+          phone,
+          address,
+          city,
+          postal_code: postalCode,
+          items: cart
+        },
+        deliveryFee
       )
 
       // Redirect to Yoco payment page
@@ -52,6 +94,7 @@ export default function CartPage() {
         window.location.href = checkoutData.redirectUrl
       } else {
         alert('Error: Could not create checkout')
+        setLoading(false)
       }
     } catch (error) {
       alert(`Checkout failed: ${error.message}`)
@@ -73,84 +116,166 @@ export default function CartPage() {
     )
   }
 
+  const total = subtotal + deliveryFee
+
   return (
-    <main className="max-w-4xl mx-auto px-4 py-8">
+    <main className="max-w-6xl mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-6">Your Cart</h1>
 
-      <div className="bg-white rounded-lg shadow">
-        {cart.map((item) => (
-          <div key={item.id} className="flex items-center gap-4 p-4 border-b last:border-b-0">
-            <img
-              src={item.image || 'https://via.placeholder.com/100'}
-              alt={item.name}
-              className="w-20 h-20 object-cover rounded"
-            />
+      <div className="grid md:grid-cols-3 gap-6">
+        {/* Cart Items */}
+        <div className="md:col-span-2">
+          <div className="bg-white rounded-lg shadow">
+            {cart.map((item) => (
+              <div key={item.id} className="flex items-center gap-4 p-4 border-b last:border-b-0">
+                <img
+                  src={item.image || 'https://via.placeholder.com/100'}
+                  alt={item.name}
+                  className="w-20 h-20 object-cover rounded"
+                />
 
-            <div className="flex-1">
-              <h3 className="font-semibold text-gray-800">{item.name}</h3>
-              <p className="text-sm text-gray-500">{item.description}</p>
-              <p className="text-lg font-bold text-green-600 mt-1">R{item.price}</p>
-            </div>
+                <div className="flex-1">
+                  <h3 className="font-semibold text-gray-800">{item.name}</h3>
+                  <p className="text-sm text-gray-500">{item.description}</p>
+                  <p className="text-lg font-bold text-green-600 mt-1">R{item.price}</p>
+                </div>
 
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => handleQuantityChange(item.id, item.quantity - 1)}
-                disabled={item.quantity <= 1}
-                className="w-8 h-8 bg-gray-200 hover:bg-gray-300 disabled:bg-gray-100 disabled:text-gray-400 rounded font-bold"
-              >
-                -
-              </button>
-              <span className="w-12 text-center font-semibold">{item.quantity}</span>
-              <button
-                onClick={() => handleQuantityChange(item.id, item.quantity + 1)}
-                className="w-8 h-8 bg-gray-200 hover:bg-gray-300 rounded font-bold"
-              >
-                +
-              </button>
-            </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => handleQuantityChange(item.id, item.quantity - 1)}
+                    disabled={item.quantity <= 1}
+                    className="w-8 h-8 bg-gray-200 hover:bg-gray-300 disabled:bg-gray-100 disabled:text-gray-400 rounded font-bold"
+                  >
+                    -
+                  </button>
+                  <span className="w-12 text-center font-semibold">{item.quantity}</span>
+                  <button
+                    onClick={() => handleQuantityChange(item.id, item.quantity + 1)}
+                    className="w-8 h-8 bg-gray-200 hover:bg-gray-300 rounded font-bold"
+                  >
+                    +
+                  </button>
+                </div>
 
-            <div className="text-right">
-              <p className="font-bold text-gray-800">R{item.price * item.quantity}</p>
-              <button
-                onClick={() => handleRemove(item.id)}
-                className="text-red-600 hover:text-red-800 text-sm mt-1"
-              >
-                Remove
-              </button>
-            </div>
+                <div className="text-right">
+                  <p className="font-bold text-gray-800">R{item.price * item.quantity}</p>
+                  <button
+                    onClick={() => handleRemove(item.id)}
+                    className="text-red-600 hover:text-red-800 text-sm mt-1"
+                  >
+                    Remove
+                  </button>
+                </div>
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
-
-      <div className="bg-white rounded-lg shadow mt-6 p-6">
-        <div className="mb-4">
-          <label className="block text-sm font-semibold text-gray-700 mb-2">Email Address</label>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="your.email@example.com"
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-600"
-          />
-          <p className="text-xs text-gray-500 mt-1">We'll use this to track your order</p>
         </div>
 
-        <div className="flex justify-between items-center mb-4">
-          <span className="text-xl font-semibold">Total:</span>
-          <span className="text-3xl font-bold text-green-600">R{total}</span>
+        {/* Checkout Form */}
+        <div className="md:col-span-1">
+          <div className="bg-white rounded-lg shadow p-6 sticky top-6">
+            <h2 className="text-xl font-bold mb-4">Delivery Details</h2>
+
+            {/* Customer Info */}
+            <div className="space-y-3 mb-6">
+              <div>
+                <label className="block text-xs font-semibold text-gray-700 mb-1">Full Name *</label>
+                <input
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="John Doe"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-600 text-sm"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-gray-700 mb-1">Email *</label>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="you@example.com"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-600 text-sm"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-gray-700 mb-1">Phone *</label>
+                <input
+                  type="tel"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  placeholder="07xx xxx xxxx"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-600 text-sm"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-gray-700 mb-1">Street Address *</label>
+                <input
+                  type="text"
+                  value={address}
+                  onChange={(e) => setAddress(e.target.value)}
+                  placeholder="123 Main Street"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-600 text-sm"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-gray-700 mb-1">City *</label>
+                <input
+                  type="text"
+                  value={city}
+                  onChange={(e) => setCity(e.target.value)}
+                  placeholder="Cape Town"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-600 text-sm"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-gray-700 mb-1">Postal Code *</label>
+                <input
+                  type="text"
+                  value={postalCode}
+                  onChange={(e) => setPostalCode(e.target.value)}
+                  placeholder="8000"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-600 text-sm"
+                />
+              </div>
+            </div>
+
+            <p className="text-xs text-gray-500 mb-4">Estimated delivery: 3-7 business days</p>
+
+            {/* Order Summary */}
+            <div className="border-t pt-4 space-y-2">
+              <div className="flex justify-between text-sm">
+                <span>Subtotal:</span>
+                <span className="font-semibold">R{subtotal.toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span>Delivery:</span>
+                <span className="font-semibold">R{deliveryFee.toFixed(2)}</span>
+              </div>
+              <div className="border-t pt-2 flex justify-between text-lg font-bold">
+                <span>Total:</span>
+                <span className="text-green-600">R{total.toFixed(2)}</span>
+              </div>
+            </div>
+
+            <button
+              onClick={handleCheckout}
+              disabled={loading}
+              className="w-full bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white font-bold py-3 px-6 rounded-lg text-base mt-4 transition"
+            >
+              {loading ? 'Processing...' : 'Proceed to Checkout'}
+            </button>
+
+            <Link href="/" className="block text-center text-blue-600 hover:text-blue-800 text-sm mt-3">
+              ← Continue Shopping
+            </Link>
+          </div>
         </div>
-
-        <button
-          onClick={handleCheckout}
-          disabled={loading}
-          className="w-full bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white font-bold py-3 px-6 rounded-lg text-lg"
-        >
-          {loading ? 'Processing...' : 'Proceed to Checkout'}
-        </button>
-
-        <Link href="/" className="block text-center text-blue-600 hover:text-blue-800 mt-4">
-          ← Continue Shopping
-        </Link>
       </div>
     </main>
   )
