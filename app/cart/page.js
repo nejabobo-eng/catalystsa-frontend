@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { getCart, removeFromCart, updateQuantity, getCartTotal } from '../../lib/cart'
 import { createCheckout } from '../../lib/api'
+import { getCustomerMemory, saveCustomerMemory, saveAddress, getLastUsedAddress } from '../../lib/customerMemory'
 import Link from 'next/link'
 
 const DELIVERY_FEE_BASE = 75
@@ -22,8 +23,13 @@ export default function CartPage() {
   const [city, setCity] = useState('')
   const [postalCode, setPostalCode] = useState('')
 
+  // Memory state
+  const [savedAddress, setSavedAddress] = useState(null)
+  const [showSaveAddressPrompt, setShowSaveAddressPrompt] = useState(false)
+
   useEffect(() => {
     loadCart()
+    loadCustomerMemory()
   }, [])
 
   function loadCart() {
@@ -35,6 +41,39 @@ export default function CartPage() {
     // Calculate delivery fee: max(75, subtotal * 0.10)
     const calculated = Math.max(DELIVERY_FEE_BASE, cartTotal * DELIVERY_FEE_PERCENT)
     setDeliveryFee(calculated)
+  }
+
+  function loadCustomerMemory() {
+    try {
+      const memory = getCustomerMemory()
+
+      if (memory) {
+        // Autofill form with stored data
+        setEmail(memory.email || '')
+        setName(memory.name || '')
+        setPhone(memory.phone || '')
+
+        // Load last used address
+        const lastAddr = getLastUsedAddress()
+        if (lastAddr) {
+          setAddress(lastAddr.address || '')
+          setCity(lastAddr.city || '')
+          setPostalCode(lastAddr.postalCode || '')
+          setSavedAddress(lastAddr)
+        }
+      }
+    } catch (error) {
+      console.error('Error loading customer memory:', error)
+    }
+  }
+
+  function handleUseSavedAddress() {
+    if (savedAddress) {
+      setAddress(savedAddress.address)
+      setCity(savedAddress.city)
+      setPostalCode(savedAddress.postalCode)
+      setShowSaveAddressPrompt(false)
+    }
   }
 
   function handleRemove(id) {
@@ -88,6 +127,22 @@ export default function CartPage() {
         },
         deliveryFee
       )
+
+      // Save customer memory BEFORE redirecting
+      // (customer will see success page if payment succeeds)
+      saveCustomerMemory({
+        email: email.trim().toLowerCase(),
+        name,
+        phone,
+        addresses: [
+          {
+            address,
+            city,
+            postalCode,
+            isDefault: true
+          }
+        ]
+      })
 
       // Redirect to Yoco payment page
       if (checkoutData.redirectUrl) {
@@ -175,6 +230,30 @@ export default function CartPage() {
         <div className="md:col-span-1">
           <div className="bg-white rounded-lg shadow p-6 sticky top-6">
             <h2 className="text-xl font-bold mb-4">Delivery Details</h2>
+
+            {/* Saved Address Banner */}
+            {savedAddress && (
+              <div className="bg-blue-50 border-l-4 border-blue-500 p-3 mb-4 rounded-r">
+                <p className="text-sm text-blue-900 font-semibold mb-2">👋 Welcome back!</p>
+                <p className="text-xs text-blue-800 mb-3">
+                  {savedAddress.address}, {savedAddress.city}
+                </p>
+                <div className="flex gap-2">
+                  <button
+                    onClick={handleUseSavedAddress}
+                    className="flex-1 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold py-2 px-3 rounded"
+                  >
+                    Use Saved
+                  </button>
+                  <button
+                    onClick={() => setSavedAddress(null)}
+                    className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 text-xs font-semibold py-2 px-3 rounded"
+                  >
+                    Enter New
+                  </button>
+                </div>
+              </div>
+            )}
 
             {/* Customer Info */}
             <div className="space-y-3 mb-6">
