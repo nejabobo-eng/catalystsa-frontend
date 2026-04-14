@@ -65,11 +65,7 @@ export default function SuccessContent() {
               <h2 className="text-3xl font-bold text-green-600">#{orderData.order_number}</h2>
             </div>
 
-            <div className="grid md:grid-cols-3 gap-4 text-center mb-6">
-              <div className="bg-blue-50 p-4 rounded-lg">
-                <p className="text-sm text-gray-600 mb-1">Total Amount</p>
-                <p className="text-2xl font-bold text-blue-600">R{((orderData.amount + (orderData.delivery_fee || 0)) / 100).toFixed(2)}</p>
-              </div>
+            <div className="grid md:grid-cols-2 gap-4 text-center mb-6">
               <div className="bg-purple-50 p-4 rounded-lg">
                 <p className="text-sm text-gray-600 mb-1">Status</p>
                 <p className="text-2xl font-bold text-purple-600">✓ Paid</p>
@@ -82,7 +78,7 @@ export default function SuccessContent() {
 
             <div className="bg-blue-50 border-l-4 border-blue-400 p-4 rounded">
               <p className="text-sm text-blue-800">
-                📧 A confirmation email has been sent to <strong>{email}</strong> with all order details and a tracking link.
+                📧 A confirmation email has been sent to <strong>{email}</strong> with your complete order details, total amount, and tracking link.
               </p>
             </div>
           </div>
