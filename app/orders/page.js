@@ -96,36 +96,58 @@ export default function OrdersPage() {
       {/* Orders List */}
       {searched && orders.length > 0 && (
         <div className="bg-white rounded-lg shadow overflow-hidden">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 bg-gray-100 p-4 font-semibold text-gray-700">
-            <div>Order ID</div>
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-4 bg-gray-100 p-4 font-semibold text-gray-700">
+            <div>Order #</div>
             <div>Amount</div>
             <div>Status</div>
             <div>Date</div>
+            <div>Action</div>
           </div>
 
           {orders.map((order) => (
             <div
               key={order.id}
-              className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 border-b last:border-b-0 hover:bg-gray-50 transition"
+              className="grid grid-cols-1 md:grid-cols-5 gap-4 p-4 border-b last:border-b-0 hover:bg-gray-50 transition items-center"
             >
-              <div className="font-mono text-sm">#{order.id}</div>
-              <div className="font-bold text-green-600">R{order.amount}</div>
+              <div className="font-mono font-bold text-lg">#{order.order_number || order.id}</div>
+              <div className="font-bold text-green-600">R{((order.amount + (order.delivery_fee || 0)) / 100).toFixed(2)}</div>
               <div>
                 <span
                   className={`px-3 py-1 rounded-full text-sm font-semibold ${
                     order.status === 'paid'
+                      ? 'bg-green-100 text-green-800'
+                      : order.status === 'processing'
+                      ? 'bg-blue-100 text-blue-800'
+                      : order.status === 'shipped'
+                      ? 'bg-purple-100 text-purple-800'
+                      : order.status === 'delivered'
                       ? 'bg-green-100 text-green-800'
                       : order.status === 'pending'
                       ? 'bg-yellow-100 text-yellow-800'
                       : 'bg-gray-100 text-gray-800'
                   }`}
                 >
-                  {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                  {order.status === 'paid' && '✅'}
+                  {order.status === 'processing' && '⏳'}
+                  {order.status === 'shipped' && '📦'}
+                  {order.status === 'delivered' && '✔'}
+                  {order.status === 'pending' && '⏳'}
+                  {' ' + order.status.charAt(0).toUpperCase() + order.status.slice(1)}
                 </span>
               </div>
               <div className="text-sm text-gray-600">
-                {new Date(order.created_at).toLocaleDateString()}
+                {new Date(order.created_at).toLocaleDateString('en-ZA', {
+                  year: '2-digit',
+                  month: 'short',
+                  day: 'numeric'
+                })}
               </div>
+              <Link
+                href={`/orders/${order.order_number || order.id}`}
+                className="text-blue-600 hover:text-blue-800 font-semibold text-sm"
+              >
+                View →
+              </Link>
             </div>
           ))}
         </div>
