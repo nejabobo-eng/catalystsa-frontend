@@ -111,13 +111,28 @@ export default function OrdersContent() {
             <div>Action</div>
           </div>
 
-          {orders.map((order) => (
+          {orders.map((order) => {
+            // Safe amount calculation
+            const amount = order.amount ? order.amount : 0
+            const deliveryFee = order.delivery_fee ? order.delivery_fee : 0
+            const total = ((amount + deliveryFee) / 100).toFixed(2)
+
+            // Safe date formatting
+            const orderDate = order.created_at
+              ? new Date(order.created_at).toLocaleDateString('en-ZA', {
+                  year: '2-digit',
+                  month: 'short',
+                  day: 'numeric'
+                })
+              : '-'
+
+            return (
             <div
               key={order.id}
               className="grid grid-cols-1 md:grid-cols-5 gap-4 p-4 border-b last:border-b-0 hover:bg-gray-50 transition items-center"
             >
               <div className="font-mono font-bold text-lg">#{order.order_number || order.id}</div>
-              <div className="font-bold text-green-600">R{((order.amount + (order.delivery_fee || 0)) / 100).toFixed(2)}</div>
+              <div className="font-bold text-green-600">R{total}</div>
               <div>
                 <span
                   className={`px-3 py-1 rounded-full text-sm font-semibold ${
@@ -143,11 +158,7 @@ export default function OrdersContent() {
                 </span>
               </div>
               <div className="text-sm text-gray-600">
-                {new Date(order.created_at).toLocaleDateString('en-ZA', {
-                  year: '2-digit',
-                  month: 'short',
-                  day: 'numeric'
-                })}
+                {orderDate}
               </div>
               <Link
                 href={`/orders/${order.order_number || order.id}`}
@@ -156,7 +167,8 @@ export default function OrdersContent() {
                 View →
               </Link>
             </div>
-          ))}
+            )
+          })}
         </div>
       )}
 

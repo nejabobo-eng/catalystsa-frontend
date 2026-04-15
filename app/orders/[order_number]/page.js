@@ -87,7 +87,7 @@ export default function OrderDetailPage() {
     )
   }
 
-  const subtotal = order.amount / 100
+  const subtotal = order.amount ? order.amount / 100 : 0
   const deliveryFee = (order.delivery_fee || 0) / 100
   const total = subtotal + deliveryFee
 
@@ -104,14 +104,14 @@ export default function OrderDetailPage() {
           <div>
             <h1 className="text-3xl font-bold mb-2">Order #{order.order_number}</h1>
             <p className="text-gray-600">
-              Ordered on {new Date(order.created_at).toLocaleDateString('en-ZA', {
+              Ordered on {order.created_at ? new Date(order.created_at).toLocaleDateString('en-ZA', {
                 weekday: 'long',
                 year: 'numeric',
                 month: 'long',
                 day: 'numeric',
                 hour: '2-digit',
                 minute: '2-digit',
-              })}
+              }) : 'Date unavailable'}
             </p>
           </div>
           <div className={`px-4 py-2 border-2 rounded-lg font-bold ${getStatusColor(order.status)}`}>
