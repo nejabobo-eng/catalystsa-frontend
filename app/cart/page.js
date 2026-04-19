@@ -184,7 +184,7 @@ export default function CartPage() {
             {cart.map((item) => (
               <div key={item.id} className="flex items-center gap-4 p-4 border-b last:border-b-0">
                 <img
-                  src={item.image || 'https://via.placeholder.com/100'}
+                  src={item.image_url || 'https://via.placeholder.com/100'}
                   alt={item.name}
                   className="w-20 h-20 object-cover rounded"
                 />
@@ -192,7 +192,9 @@ export default function CartPage() {
                 <div className="flex-1">
                   <h3 className="font-semibold text-gray-800">{item.name}</h3>
                   <p className="text-sm text-gray-500">{item.description}</p>
-                  <p className="text-lg font-bold text-green-600 mt-1">R{item.price}</p>
+                  <p className="text-lg font-bold text-green-600 mt-1">
+                    {item.price_display || `R${(item.price / 100).toFixed(2)}`}
+                  </p>
                 </div>
 
                 <div className="flex items-center gap-2">
@@ -213,7 +215,9 @@ export default function CartPage() {
                 </div>
 
                 <div className="text-right">
-                  <p className="font-bold text-gray-800">R{item.price * item.quantity}</p>
+                  <p className="font-bold text-gray-800">
+                    R{((item.price / 100) * item.quantity).toFixed(2)}
+                  </p>
                   <button
                     onClick={() => handleRemove(item.id)}
                     className="text-red-600 hover:text-red-800 text-sm mt-1"
