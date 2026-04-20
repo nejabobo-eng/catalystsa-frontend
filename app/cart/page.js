@@ -6,14 +6,12 @@ import { createCheckout } from '../../lib/api'
 import { getCustomerMemory, saveCustomerMemory, saveAddress, getLastUsedAddress } from '../../lib/customerMemory'
 import Link from 'next/link'
 
-const DELIVERY_FEE_BASE = 79  // R79 base fee
-const DELIVERY_FEE_PER_KG = 10  // R10 per kg
-const BULKY_ITEM_FEE = 150  // R150 for bulky items
+const DELIVERY_FEE = 99  // Flat R99 delivery (MVP - simple and predictable)
 
 export default function CartPage() {
   const [cart, setCart] = useState([])
   const [subtotal, setSubtotal] = useState(0)
-  const [deliveryFee, setDeliveryFee] = useState(0)
+  const [deliveryFee, setDeliveryFee] = useState(DELIVERY_FEE)
   const [loading, setLoading] = useState(false)
 
   // Customer information
@@ -38,28 +36,7 @@ export default function CartPage() {
     setCart(cartItems)
     const cartTotal = getCartTotal()
     setSubtotal(cartTotal)
-
-    // NEW LOGIC: Weight-based delivery calculation
-    let totalWeight = 0
-    let hasBulky = false
-
-    cartItems.forEach(item => {
-      const itemWeight = item.weight_kg || 0.5  // Default 0.5kg if not set
-      totalWeight += itemWeight * item.quantity
-
-      if (item.size_category === 'bulky') {
-        hasBulky = true
-      }
-    })
-
-    // Hybrid delivery: Base + weight + bulky surcharge
-    let calculated = DELIVERY_FEE_BASE
-    calculated += totalWeight * DELIVERY_FEE_PER_KG
-    if (hasBulky) {
-      calculated += BULKY_ITEM_FEE
-    }
-
-    setDeliveryFee(calculated)
+    // Delivery is flat R99 - no calculations needed
   }
 
   function loadCustomerMemory() {
