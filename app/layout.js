@@ -99,23 +99,14 @@ export default function RootLayout({ children }) {
                 </ul>
               </div>
 
-              {/* Trust & Security */}
+              {/* Legal */}
               <div>
-                <h4 className="text-white font-semibold mb-4">Secure Shopping</h4>
-                <div className="space-y-3 text-sm">
-                  <div className="flex items-center gap-2">
-                    <span className="text-green-500">✓</span>
-                    <span>Secure Payments via Yoco</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-green-500">✓</span>
-                    <span>Nationwide Delivery: R99</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-green-500">✓</span>
-                    <span>Track Your Order 24/7</span>
-                  </div>
-                </div>
+                <h4 className="text-white font-semibold mb-4">Legal</h4>
+                <ul className="space-y-2 text-sm">
+                  <li><a href="/privacy" className="hover:text-white transition-colors">Privacy Policy</a></li>
+                  <li><a href="/terms" className="hover:text-white transition-colors">Terms of Service</a></li>
+                  <li><a href="/returns" className="hover:text-white transition-colors">Returns Policy</a></li>
+                </ul>
               </div>
             </div>
 
@@ -124,10 +115,19 @@ export default function RootLayout({ children }) {
               <p className="text-gray-500">
                 © {new Date().getFullYear()} CatalystSA. All rights reserved.
               </p>
-              <div className="flex gap-6">
-                <a href="/privacy" className="hover:text-white transition-colors">Privacy Policy</a>
-                <a href="/terms" className="hover:text-white transition-colors">Terms of Service</a>
-                <a href="/returns" className="hover:text-white transition-colors">Returns</a>
+              <div className="flex flex-wrap gap-4 justify-center text-xs text-gray-400">
+                <div className="flex items-center gap-1">
+                  <span className="text-green-500">✓</span>
+                  <span>Secure Payments via Yoco</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <span className="text-green-500">✓</span>
+                  <span>R99 Nationwide Delivery</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <span className="text-green-500">✓</span>
+                  <span>Orders Processed Within 24hrs</span>
+                </div>
               </div>
             </div>
           </div>

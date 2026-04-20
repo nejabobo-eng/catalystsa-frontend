@@ -13,30 +13,14 @@ export default async function Home() {
         <div className="max-w-7xl mx-auto px-4 py-16 md:py-24">
           <div className="max-w-3xl">
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
-              Quality Products, <br />
-              Delivered Nationwide
+              Quality Products Delivered <br className="hidden md:block" />
+              Across South Africa
             </h1>
             <p className="text-xl md:text-2xl mb-8 text-blue-100">
-              Shop with confidence. Fast delivery across South Africa for just R99.
+              Fast, secure shopping with R99 nationwide delivery.
             </p>
 
-            {/* Trust Badges */}
-            <div className="flex flex-wrap gap-6 mb-8">
-              <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-lg">
-                <span className="text-2xl">🔒</span>
-                <span className="font-medium">Secure Payments</span>
-              </div>
-              <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-lg">
-                <span className="text-2xl">🚚</span>
-                <span className="font-medium">R99 Delivery</span>
-              </div>
-              <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-lg">
-                <span className="text-2xl">📦</span>
-                <span className="font-medium">Order Tracking</span>
-              </div>
-            </div>
-
-            <div className="flex gap-4">
+            <div className="flex gap-4 mb-8">
               <a 
                 href="#products" 
                 className="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-blue-50 transition-colors shadow-lg"
@@ -49,6 +33,22 @@ export default async function Home() {
               >
                 Track Order
               </a>
+            </div>
+
+            {/* Trust Badges - Below buttons for cleaner hierarchy */}
+            <div className="flex flex-wrap gap-4 pt-4 border-t border-white/20">
+              <div className="flex items-center gap-2 text-blue-100">
+                <span className="text-xl">🔒</span>
+                <span className="text-sm">Secure Payments</span>
+              </div>
+              <div className="flex items-center gap-2 text-blue-100">
+                <span className="text-xl">🚚</span>
+                <span className="text-sm">R99 Delivery</span>
+              </div>
+              <div className="flex items-center gap-2 text-blue-100">
+                <span className="text-xl">⚡</span>
+                <span className="text-sm">24hr Processing</span>
+              </div>
             </div>
           </div>
         </div>
@@ -89,7 +89,7 @@ export default async function Home() {
               </div>
               <h3 className="text-xl font-bold mb-3">Secure Payments</h3>
               <p className="text-gray-600">
-                All transactions protected by Yoco's industry-leading payment security. Shop with complete confidence.
+                Protected by Yoco secure payment system. Shop with complete confidence.
               </p>
             </div>
 
@@ -100,7 +100,7 @@ export default async function Home() {
               </div>
               <h3 className="text-xl font-bold mb-3">Fast Delivery</h3>
               <p className="text-gray-600">
-                Nationwide delivery for just R99. Track your order in real-time from checkout to your door.
+                R99 nationwide delivery with tracking. Orders processed within 24 hours.
               </p>
             </div>
 
@@ -111,7 +111,7 @@ export default async function Home() {
               </div>
               <h3 className="text-xl font-bold mb-3">Expert Support</h3>
               <p className="text-gray-600">
-                Need help? Our WhatsApp support team is ready to assist you with any questions or concerns.
+                Instant WhatsApp support when you need help. We're here for you.
               </p>
             </div>
           </div>
