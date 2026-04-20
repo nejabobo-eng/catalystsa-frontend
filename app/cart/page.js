@@ -6,12 +6,13 @@ import { createCheckout } from '../../lib/api'
 import { getCustomerMemory, saveCustomerMemory, saveAddress, getLastUsedAddress } from '../../lib/customerMemory'
 import Link from 'next/link'
 
-const DELIVERY_FEE = 99  // Flat R99 delivery (MVP - simple and predictable)
+const DELIVERY_FEE_RANDS = 99  // R99 flat delivery
+const DELIVERY_FEE_CENTS = 9900  // Same in cents (for API)
 
 export default function CartPage() {
   const [cart, setCart] = useState([])
   const [subtotal, setSubtotal] = useState(0)
-  const [deliveryFee, setDeliveryFee] = useState(DELIVERY_FEE)
+  const [deliveryFee, setDeliveryFee] = useState(DELIVERY_FEE_RANDS)  // Display in rands
   const [loading, setLoading] = useState(false)
 
   // Customer information
@@ -108,6 +109,8 @@ export default function CartPage() {
       const baseUrl = window.location.origin
       const total = subtotal + deliveryFee
 
+      // FINANCIAL INTEGRITY: Send delivery in same units as subtotal (rands)
+      // Backend will convert to cents internally
       const checkoutData = await createCheckout(
         total,
         `${baseUrl}/success?email=${encodeURIComponent(email)}`,
@@ -121,7 +124,7 @@ export default function CartPage() {
           postal_code: postalCode,
           items: cart
         },
-        deliveryFee
+        DELIVERY_FEE_RANDS  // Use constant to avoid ambiguity
       )
 
       // Save customer memory BEFORE redirecting
