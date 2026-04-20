@@ -18,6 +18,9 @@ export default function AdminDashboard() {
   const [statusUpdating, setStatusUpdating] = useState(false)
   const [statusMessage, setStatusMessage] = useState('')
 
+  // Tracking number for shipping
+  const [trackingNumber, setTrackingNumber] = useState('')
+
   // Filters
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState('')
@@ -103,7 +106,7 @@ export default function AdminDashboard() {
     }
   }
 
-  async function updateOrderStatus(newStatus) {
+  async function updateOrderStatus(newStatus, tracking = null) {
     if (!selectedOrder) return
 
     setStatusUpdating(true)
@@ -111,27 +114,37 @@ export default function AdminDashboard() {
     const token = localStorage.getItem('admin_token')
 
     try {
+      const payload = { status: newStatus }
+      if (tracking) {
+        payload.tracking_number = tracking
+      }
+
       const res = await fetch(`${API_URL}/admin/orders/${selectedOrder.order_number}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
         },
-        body: JSON.stringify({ status: newStatus }),
+        body: JSON.stringify(payload),
       })
 
-      if (!res.ok) throw new Error('Failed to update status')
+      if (!res.ok) {
+        const error = await res.json()
+        throw new Error(error.detail || 'Failed to update status')
+      }
 
+      const data = await res.json()
       setStatusMessage(`✅ Status updated to ${newStatus}`)
-      setSelectedOrder({ ...selectedOrder, status: newStatus })
-      
+      setSelectedOrder({ ...selectedOrder, status: newStatus, tracking_number: data.tracking_number || selectedOrder.tracking_number })
+      setTrackingNumber('')  // Clear tracking input
+
       // Refresh orders list
       const currentToken = localStorage.getItem('admin_token')
       fetchOrders(currentToken, searchQuery, statusFilter)
 
       setTimeout(() => setStatusMessage(''), 3000)
     } catch (error) {
-      setStatusMessage(`❌ Error: ${error.message}`)
+      setStatusMessage(`❌ ${error.message}`)
     } finally {
       setStatusUpdating(false)
     }
@@ -378,29 +391,102 @@ export default function AdminDashboard() {
                   </div>
                 </div>
 
-                {/* Status Update */}
+                {/* Status Update - Workflow Buttons */}
                 <div className="mb-6">
-                  <h4 className="text-sm font-semibold text-gray-700 mb-3 uppercase">Status</h4>
-                  <select
-                    value={selectedOrder.status}
-                    onChange={(e) => updateOrderStatus(e.target.value)}
-                    disabled={statusUpdating}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
-                  >
-                    <option value="pending">Pending</option>
-                    <option value="paid">Paid</option>
-                    <option value="processing">Processing</option>
-                    <option value="shipped">Shipped</option>
-                    <option value="delivered">Delivered</option>
-                  </select>
+                  <h4 className="text-sm font-semibold text-gray-700 mb-3 uppercase">Order Workflow</h4>
+
+                  {/* Current Status Badge */}
+                  <div className="mb-4">
+                    <span className={`inline-block px-3 py-1 rounded-full text-sm font-semibold ${
+                      selectedOrder.status === 'paid'
+                        ? 'bg-green-100 text-green-800'
+                        : selectedOrder.status === 'processing'
+                        ? 'bg-blue-100 text-blue-800'
+                        : selectedOrder.status === 'shipped'
+                        ? 'bg-purple-100 text-purple-800'
+                        : selectedOrder.status === 'delivered'
+                        ? 'bg-gray-100 text-gray-800'
+                        : 'bg-gray-100 text-gray-800'
+                    }`}>
+                      {selectedOrder.status.toUpperCase()}
+                    </span>
+                  </div>
+
+                  {/* Workflow Actions */}
+                  <div className="space-y-3">
+                    {/* PAID → PROCESSING */}
+                    {selectedOrder.status === 'paid' && (
+                      <button
+                        onClick={() => updateOrderStatus('processing')}
+                        disabled={statusUpdating}
+                        className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white px-4 py-2 rounded-lg font-semibold transition flex items-center justify-center gap-2"
+                      >
+                        <span>▶️</span> Start Processing
+                      </button>
+                    )}
+
+                    {/* PROCESSING → SHIPPED (with tracking) */}
+                    {selectedOrder.status === 'processing' && (
+                      <div className="space-y-2">
+                        <input
+                          type="text"
+                          placeholder="Tracking number (e.g., DHL123456)"
+                          value={trackingNumber}
+                          onChange={(e) => setTrackingNumber(e.target.value)}
+                          className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+                        />
+                        <button
+                          onClick={() => updateOrderStatus('shipped', trackingNumber)}
+                          disabled={statusUpdating || !trackingNumber.trim()}
+                          className="w-full bg-purple-600 hover:bg-purple-700 disabled:bg-purple-400 text-white px-4 py-2 rounded-lg font-semibold transition flex items-center justify-center gap-2"
+                        >
+                          <span>📦</span> Mark as Shipped
+                        </button>
+                      </div>
+                    )}
+
+                    {/* SHIPPED → DELIVERED */}
+                    {selectedOrder.status === 'shipped' && (
+                      <div className="space-y-2">
+                        {selectedOrder.tracking_number && (
+                          <div className="bg-gray-50 p-3 rounded-lg text-sm">
+                            <p className="text-gray-600">Tracking Number:</p>
+                            <p className="font-mono font-semibold text-gray-800">{selectedOrder.tracking_number}</p>
+                          </div>
+                        )}
+                        <button
+                          onClick={() => updateOrderStatus('delivered')}
+                          disabled={statusUpdating}
+                          className="w-full bg-green-600 hover:bg-green-700 disabled:bg-green-400 text-white px-4 py-2 rounded-lg font-semibold transition flex items-center justify-center gap-2"
+                        >
+                          <span>✅</span> Mark as Delivered
+                        </button>
+                      </div>
+                    )}
+
+                    {/* DELIVERED (final state) */}
+                    {selectedOrder.status === 'delivered' && (
+                      <div className="bg-green-50 border border-green-200 p-4 rounded-lg text-center">
+                        <p className="text-green-800 font-semibold">✔ Order Complete</p>
+                        {selectedOrder.tracking_number && (
+                          <p className="text-sm text-gray-600 mt-2">Tracking: {selectedOrder.tracking_number}</p>
+                        )}
+                      </div>
+                    )}
+                  </div>
 
                   {statusMessage && (
-                    <div className={`mt-2 px-3 py-2 rounded text-sm ${
+                    <div className={`mt-3 px-3 py-2 rounded text-sm ${
                       statusMessage.includes('✅')
                         ? 'bg-green-50 text-green-700 border border-green-200'
                         : 'bg-red-50 text-red-700 border border-red-200'
                     }`}>
                       {statusMessage}
+                    </div>
+                  )}
+                </div>
+
+                {/* Items */}
                     </div>
                   )}
                 </div>
