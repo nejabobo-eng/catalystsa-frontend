@@ -329,6 +329,22 @@ export default function CartPage() {
 
             <p className="text-xs text-gray-500 mb-4">Estimated delivery: 3-7 business days</p>
 
+            {/* Trust Badges */}
+            <div className="bg-gradient-to-br from-blue-50 to-green-50 rounded-lg p-3 mb-4 border border-blue-100">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-lg">🔒</span>
+                <span className="text-xs font-semibold text-gray-800">Secure Payment via Yoco</span>
+              </div>
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-lg">📦</span>
+                <span className="text-xs font-semibold text-gray-800">Free Order Tracking</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-lg">💬</span>
+                <span className="text-xs font-semibold text-gray-800">24/7 WhatsApp Support</span>
+              </div>
+            </div>
+
             {/* Order Summary */}
             <div className="border-t pt-4 space-y-2">
               <div className="flex justify-between text-sm">
@@ -348,10 +364,14 @@ export default function CartPage() {
             <button
               onClick={handleCheckout}
               disabled={loading}
-              className="w-full bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white font-bold py-3 px-6 rounded-lg text-base mt-4 transition"
+              className="w-full bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white font-bold py-3 px-6 rounded-lg text-base mt-4 transition shadow-lg hover:shadow-xl disabled:shadow-none"
             >
-              {loading ? 'Processing...' : 'Proceed to Checkout'}
+              {loading ? 'Processing...' : '🔒 Secure Checkout'}
             </button>
+
+            <p className="text-xs text-center text-gray-500 mt-2">
+              🔐 Your payment is secured by Yoco
+            </p>
 
             <Link href="/" className="block text-center text-blue-600 hover:text-blue-800 text-sm mt-3">
               ← Continue Shopping
