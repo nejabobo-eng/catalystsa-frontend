@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { addToCart } from '../lib/cart'
 
-export default function ProductCard({ product }) {
+export default function ProductCard({ product, featured = false }) {
   const [imageError, setImageError] = useState(false)
   const [imageLoading, setImageLoading] = useState(true)
   const inStock = product.stock > 0
@@ -17,7 +17,9 @@ export default function ProductCard({ product }) {
   const displayImage = (product.image_url && !imageError) ? product.image_url : placeholderImage
 
   return (
-    <div className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 border border-gray-100 overflow-hidden group">
+    <div className={`bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 border overflow-hidden group ${
+      featured ? 'border-orange-300 ring-2 ring-orange-100' : 'border-gray-100'
+    }`}>
       {/* Image Section with Enhanced Styling */}
       <div className="relative w-full h-64 bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden">
         {imageLoading && !imageError && (
@@ -38,6 +40,14 @@ export default function ProductCard({ product }) {
             setImageLoading(false)
           }}
         />
+
+        {featured && (
+          <div className="absolute top-3 left-3">
+            <span className="bg-orange-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg">
+              ⭐ Featured
+            </span>
+          </div>
+        )}
 
         {!inStock && (
           <div className="absolute inset-0 bg-black bg-opacity-60 flex items-center justify-center backdrop-blur-sm">
@@ -62,18 +72,28 @@ export default function ProductCard({ product }) {
           {product.name}
         </h3>
 
-        <p className="text-sm text-gray-600 mb-4 line-clamp-2 min-h-[2.5rem]">
+        <p className="text-sm text-gray-600 mb-3 line-clamp-2 min-h-[2.5rem]">
           {product.description || 'Quality product available now'}
         </p>
+
+        {/* Product-Level Trust Signals */}
+        {inStock && (
+          <div className="flex items-center gap-2 mb-3 text-xs text-gray-600">
+            <span className="flex items-center gap-1">
+              <span className="text-green-500">✓</span> In stock
+            </span>
+            <span className="text-gray-400">·</span>
+            <span className="flex items-center gap-1">
+              <span>🚚</span> Delivery 2-5 days
+            </span>
+          </div>
+        )}
 
         <div className="flex justify-between items-center pt-3 border-t border-gray-100">
           <div>
             <span className="text-2xl font-bold text-green-600">
               {product.price_display || `R${(product.price / 100).toFixed(2)}`}
             </span>
-            {inStock && (
-              <p className="text-xs text-gray-500 mt-1">In stock</p>
-            )}
           </div>
 
           <button

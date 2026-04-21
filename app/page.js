@@ -6,6 +6,21 @@ export const dynamic = 'force-dynamic'
 export default async function Home() {
   const products = await getProducts()
 
+  // Product grouping logic (no backend changes needed)
+  const featuredIds = [1, 2] // Manually curate your best sellers
+  const featured = products.filter(p => featuredIds.includes(p.id))
+
+  // New arrivals = most recent 4 products
+  const newArrivals = products
+    .sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0))
+    .slice(0, 4)
+
+  // Budget picks = under R500
+  const budgetPicks = products.filter(p => p.price < 50000) // 50000 cents = R500
+
+  // All products (default view if no grouping)
+  const allProducts = products
+
   return (
     <main>
       {/* Hero Section - Clean & Focused */}
@@ -33,33 +48,29 @@ export default async function Home() {
               </a>
             </div>
 
-            {/* Horizontal Trust Strip - Single Line */}
+            {/* Horizontal Trust Strip - Customer Control Focused */}
             <div className="flex flex-wrap justify-center items-center gap-6 text-sm text-blue-100">
               <div className="flex items-center gap-2">
                 <span>🔒</span>
-                <span>Secure Payments</span>
+                <span>Secure payments</span>
               </div>
-              <span className="hidden sm:inline text-blue-300">|</span>
+              <span className="hidden sm:inline text-blue-300">·</span>
               <div className="flex items-center gap-2">
                 <span>🚚</span>
                 <span>Delivery from R99</span>
               </div>
-              <span className="hidden sm:inline text-blue-300">|</span>
+              <span className="hidden sm:inline text-blue-300">·</span>
               <div className="flex items-center gap-2">
-                <span>⚡</span>
-                <span>24hr Processing</span>
+                <span>📦</span>
+                <span>Track your order anytime</span>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Products Section - Main Focus */}
+      {/* Products Section - Grouped for Better Discovery */}
       <section id="products" className="max-w-7xl mx-auto px-4 py-12">
-        <div className="mb-8 text-center">
-          <h2 className="text-3xl font-bold mb-2">Our Products</h2>
-          <p className="text-gray-600">Browse our collection of quality products</p>
-        </div>
 
         {products.length === 0 ? (
           <div className="text-center py-12 bg-white rounded-xl shadow-sm">
@@ -68,11 +79,79 @@ export default async function Home() {
             <p className="text-gray-400 mt-2">Check back soon for exciting new arrivals!</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {products.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
-          </div>
+          <>
+            {/* Featured Products */}
+            {featured.length > 0 && (
+              <div className="mb-16">
+                <div className="flex items-center justify-between mb-6">
+                  <div>
+                    <h2 className="text-2xl font-bold flex items-center gap-2">
+                      <span>🔥</span> Featured Products
+                    </h2>
+                    <p className="text-gray-600 text-sm mt-1">Our most popular items</p>
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                  {featured.map((product) => (
+                    <ProductCard key={product.id} product={product} featured={true} />
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* New Arrivals */}
+            {newArrivals.length > 0 && (
+              <div className="mb-16">
+                <div className="flex items-center justify-between mb-6">
+                  <div>
+                    <h2 className="text-2xl font-bold flex items-center gap-2">
+                      <span>🆕</span> New Arrivals
+                    </h2>
+                    <p className="text-gray-600 text-sm mt-1">Just added to our store</p>
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                  {newArrivals.slice(0, 4).map((product) => (
+                    <ProductCard key={product.id} product={product} />
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Budget Picks */}
+            {budgetPicks.length > 0 && (
+              <div className="mb-16">
+                <div className="flex items-center justify-between mb-6">
+                  <div>
+                    <h2 className="text-2xl font-bold flex items-center gap-2">
+                      <span>💰</span> Under R500
+                    </h2>
+                    <p className="text-gray-600 text-sm mt-1">Great value products</p>
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                  {budgetPicks.slice(0, 4).map((product) => (
+                    <ProductCard key={product.id} product={product} />
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* All Products (fallback if no grouping applies) */}
+            {featured.length === 0 && newArrivals.length === 0 && budgetPicks.length === 0 && (
+              <div>
+                <div className="mb-6 text-center">
+                  <h2 className="text-2xl font-bold">All Products</h2>
+                  <p className="text-gray-600 text-sm mt-1">Browse our full catalog</p>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                  {allProducts.map((product) => (
+                    <ProductCard key={product.id} product={product} />
+                  ))}
+                </div>
+              </div>
+            )}
+          </>
         )}
       </section>
 
