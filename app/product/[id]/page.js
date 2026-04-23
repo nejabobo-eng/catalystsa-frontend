@@ -1,6 +1,7 @@
 import { getProduct } from '@/lib/api'
 import { optimizeImage } from '@/lib/image'
 import ProductCard from '@/components/ProductCard'
+import Recommendations from '@/components/Recommendations'
 
 export const dynamic = 'force-dynamic'
 
@@ -32,11 +33,7 @@ export default async function ProductPage({ params }) {
       </div>
 
       <section className="mt-12">
-        <h2 className="text-xl font-bold mb-4">You may also like</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {/* placeholder: render first 3 products as simple recommendations */}
-          {/* TODO: replace with real related products endpoint */}
-        </div>
+        <Recommendations productId={product.id} />
       </section>
     </main>
   )
