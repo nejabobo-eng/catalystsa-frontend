@@ -14,7 +14,7 @@ export default function ProductCard({ product, featured = false }) {
     alert(`✅ ${product.name} added to cart!`)
   }
 
-  const placeholderImage = 'https://via.placeholder.com/400x300/e5e7eb/6b7280?text=No+Image'
+  const placeholderImage = '/no-image.svg'
   const rawImage = (product.image_url && !imageError) ? product.image_url : placeholderImage
   const displayImage = optimizeImage(rawImage, 400)
 
@@ -31,7 +31,7 @@ export default function ProductCard({ product, featured = false }) {
         )}
 
         <img
-          src={displayImage || '/placeholder.png'}
+          src={displayImage || '/no-image.svg'}
           alt={product.name}
           className={`w-full h-full object-cover transition-all duration-300 group-hover:scale-105 ${
             imageLoading ? 'opacity-0' : 'opacity-100'
