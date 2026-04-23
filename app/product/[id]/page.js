@@ -12,7 +12,11 @@ export default async function ProductPage({ params }) {
     <main className="max-w-4xl mx-auto p-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <div>
-          <img src={optimizeImage(product.image_url, 800)} alt={product.name} className="w-full rounded-lg object-cover" />
+          <img
+            src={optimizeImage(product.image_url, 800) || '/no-image.svg'}
+            alt={product.name}
+            className="w-full rounded-lg object-cover"
+          />
         </div>
         <div>
           <h1 className="text-2xl font-bold mb-2">{product.name}</h1>
