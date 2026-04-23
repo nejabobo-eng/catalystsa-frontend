@@ -1,6 +1,6 @@
-import { getProduct } from '../../lib/api'
-import { optimizeImage } from '../../lib/image'
-import ProductCard from '../../components/ProductCard'
+import { getProduct } from '@/lib/api'
+import { optimizeImage } from '@/lib/image'
+import ProductCard from '@/components/ProductCard'
 
 export const dynamic = 'force-dynamic'
 
