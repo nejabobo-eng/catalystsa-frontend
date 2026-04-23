@@ -1,5 +1,6 @@
 import { getProducts } from '../lib/api'
 import ProductCard from '../components/ProductCard'
+import ProductSearch from '../components/ProductSearch'
 
 export const dynamic = 'force-dynamic'
 
@@ -71,6 +72,9 @@ export default async function Home() {
 
       {/* Products Section - Grouped for Better Discovery */}
       <section id="products" className="max-w-7xl mx-auto px-4 py-12">
+
+        {/* Search component (client-side) */}
+        <ProductSearch initialProducts={products} />
 
         {products.length === 0 ? (
           <div className="text-center py-12 bg-white rounded-xl shadow-sm">
