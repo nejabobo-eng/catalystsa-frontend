@@ -31,7 +31,7 @@ export default function ProductCard({ product, featured = false }) {
         )}
 
         <img
-          src={displayImage}
+          src={displayImage || '/placeholder.png'}
           alt={product.name}
           className={`w-full h-full object-cover transition-all duration-300 group-hover:scale-105 ${
             imageLoading ? 'opacity-0' : 'opacity-100'
