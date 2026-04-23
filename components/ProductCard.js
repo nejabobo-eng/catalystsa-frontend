@@ -1,7 +1,8 @@
-'use client'
+"use client"
 
 import { useState } from 'react'
 import { addToCart } from '../lib/cart'
+import { optimizeImage } from '../lib/image'
 
 export default function ProductCard({ product, featured = false }) {
   const [imageError, setImageError] = useState(false)
@@ -14,7 +15,8 @@ export default function ProductCard({ product, featured = false }) {
   }
 
   const placeholderImage = 'https://via.placeholder.com/400x300/e5e7eb/6b7280?text=No+Image'
-  const displayImage = (product.image_url && !imageError) ? product.image_url : placeholderImage
+  const rawImage = (product.image_url && !imageError) ? product.image_url : placeholderImage
+  const displayImage = optimizeImage(rawImage, 400)
 
   return (
     <div className={`bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 border overflow-hidden group ${
