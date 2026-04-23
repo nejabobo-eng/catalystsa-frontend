@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from 'react'
+import Link from 'next/link'
 import { addToCart } from '../lib/cart'
 import { optimizeImage } from '../lib/image'
 
@@ -9,7 +10,9 @@ export default function ProductCard({ product, featured = false }) {
   const [imageLoading, setImageLoading] = useState(true)
   const inStock = product.stock > 0
 
-  function handleAddToCart() {
+  function handleAddToCart(e) {
+    // Prevent Link navigation when clicking Add to Cart
+    if (e && e.stopPropagation) e.stopPropagation()
     addToCart(product)
     alert(`✅ ${product.name} added to cart!`)
   }
@@ -19,9 +22,10 @@ export default function ProductCard({ product, featured = false }) {
   const displayImage = optimizeImage(rawImage, 400)
 
   return (
-    <div className={`bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 border overflow-hidden group ${
-      featured ? 'border-orange-300 ring-2 ring-orange-100' : 'border-gray-100'
-    }`}>
+    <Link href={`/product/${product.id}`} className="no-underline">
+      <div className={`bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 border overflow-hidden group ${
+        featured ? 'border-orange-300 ring-2 ring-orange-100' : 'border-gray-100'
+      }`}>
       {/* Image Section with Enhanced Styling */}
       <div className="relative w-full h-64 bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden">
         {imageLoading && !imageError && (
@@ -99,7 +103,7 @@ export default function ProductCard({ product, featured = false }) {
           </div>
 
           <button
-            onClick={handleAddToCart}
+            onClick={(e) => handleAddToCart(e)}
             disabled={!inStock}
             className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white px-5 py-2.5 rounded-lg font-semibold transition-all shadow-md hover:shadow-lg disabled:shadow-none"
           >
@@ -107,6 +111,7 @@ export default function ProductCard({ product, featured = false }) {
           </button>
         </div>
       </div>
-    </div>
+      </div>
+    </Link>
   )
 }
