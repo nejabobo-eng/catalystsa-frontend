@@ -2,10 +2,9 @@ import { getProduct } from '@/lib/api'
 import { optimizeImage } from '@/lib/image'
 import ProductCard from '@/components/ProductCard'
 import Recommendations from '@/components/Recommendations'
-import dynamic from 'next/dynamic'
+import nextDynamic from 'next/dynamic'
 
-const ViewTracker = dynamic(() => import('@/components/ViewTracker'), { ssr: false })
-import { useEffect } from 'react'
+const ViewTracker = nextDynamic(() => import('@/components/ViewTracker'), { ssr: false })
 
 export const dynamic = 'force-dynamic'
 
