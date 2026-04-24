@@ -8,19 +8,26 @@ export default async function Home() {
   const products = await getProducts()
 
   // Product grouping logic (no backend changes needed)
-  const featuredIds = [1, 2] // Manually curate your best sellers
-  const featured = products.filter(p => featuredIds.includes(p.id))
-
-  // New arrivals = most recent 4 products
+  // New Arrivals = latest 5 products (hook section)
   const newArrivals = products
+    .slice() // copy
     .sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0))
-    .slice(0, 4)
+    .slice(0, 5)
 
-  // Budget picks = under R500
-  const budgetPicks = products.filter(p => p.price < 50000) // 50000 cents = R500
+  // Top Selling - placeholder logic until sales_count exists
+  // Use low stock (fast-selling) then recent as a fallback
+  const topSelling = products
+    .slice()
+    .sort((a, b) => {
+      const aStock = a.stock ?? 0
+      const bStock = b.stock ?? 0
+      if (aStock !== bStock) return aStock - bStock
+      return new Date(b.created_at || 0) - new Date(a.created_at || 0)
+    })
+    .slice(0, 5)
 
-  // All products (default view if no grouping)
-  const allProducts = products
+  // All products - main catalog sorted by newest first
+  const allProducts = products.slice().sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0))
 
   return (
     <main>
@@ -84,26 +91,7 @@ export default async function Home() {
           </div>
         ) : (
           <>
-            {/* Featured Products */}
-            {featured.length > 0 && (
-              <div className="mb-16">
-                <div className="flex items-center justify-between mb-6">
-                  <div>
-                    <h2 className="text-2xl font-bold flex items-center gap-2">
-                      <span>🔥</span> Featured Products
-                    </h2>
-                    <p className="text-gray-600 text-sm mt-1">Our most popular items</p>
-                  </div>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                  {featured.map((product) => (
-                    <ProductCard key={product.id} product={product} featured={true} />
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* New Arrivals */}
+            {/* New Arrivals (hook) */}
             {newArrivals.length > 0 && (
               <div className="mb-16">
                 <div className="flex items-center justify-between mb-6">
@@ -111,50 +99,48 @@ export default async function Home() {
                     <h2 className="text-2xl font-bold flex items-center gap-2">
                       <span>🆕</span> New Arrivals
                     </h2>
-                    <p className="text-gray-600 text-sm mt-1">Just added to our store</p>
+                    <p className="text-gray-600 text-sm mt-1">Latest products just added</p>
                   </div>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                  {newArrivals.slice(0, 4).map((product) => (
+                  {newArrivals.map((product) => (
                     <ProductCard key={product.id} product={product} />
                   ))}
                 </div>
               </div>
             )}
 
-            {/* Budget Picks */}
-            {budgetPicks.length > 0 && (
+            {/* Top Selling (placeholder logic) */}
+            {topSelling.length > 0 && (
               <div className="mb-16">
                 <div className="flex items-center justify-between mb-6">
                   <div>
                     <h2 className="text-2xl font-bold flex items-center gap-2">
-                      <span>💰</span> Under R500
+                      <span>🔥</span> Top Selling
                     </h2>
-                    <p className="text-gray-600 text-sm mt-1">Great value products</p>
+                    <p className="text-gray-600 text-sm mt-1">Best sellers & popular picks</p>
                   </div>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                  {budgetPicks.slice(0, 4).map((product) => (
+                  {topSelling.map((product) => (
                     <ProductCard key={product.id} product={product} />
                   ))}
                 </div>
               </div>
             )}
 
-            {/* All Products (fallback if no grouping applies) */}
-            {featured.length === 0 && newArrivals.length === 0 && budgetPicks.length === 0 && (
-              <div>
-                <div className="mb-6 text-center">
-                  <h2 className="text-2xl font-bold">All Products</h2>
-                  <p className="text-gray-600 text-sm mt-1">Browse our full catalog</p>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                  {allProducts.map((product) => (
-                    <ProductCard key={product.id} product={product} />
-                  ))}
-                </div>
+            {/* All Products */}
+            <div className="mb-16">
+              <div className="mb-6 text-center">
+                <h2 className="text-2xl font-bold">All Products</h2>
+                <p className="text-gray-600 text-sm mt-1">Browse our full catalog</p>
               </div>
-            )}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                {allProducts.map((product) => (
+                  <ProductCard key={product.id} product={product} />
+                ))}
+              </div>
+            </div>
           </>
         )}
       </section>

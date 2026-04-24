@@ -1,12 +1,14 @@
 "use client"
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import ProductCard from './ProductCard'
 
 export default function ProductSearch({ initialProducts = [] }) {
   const [query, setQuery] = useState('')
   const [results, setResults] = useState(initialProducts)
   const [history, setHistory] = useState([])
+  const [showHistory, setShowHistory] = useState(false)
+  const blurTimer = useRef(null)
 
   useEffect(() => {
     try {
@@ -45,6 +47,19 @@ export default function ProductSearch({ initialProducts = [] }) {
     saveToHistory(trimmed)
   }
 
+  function handleFocus() {
+    if (blurTimer.current) {
+      clearTimeout(blurTimer.current)
+      blurTimer.current = null
+    }
+    setShowHistory(true)
+  }
+
+  function handleBlur() {
+    // Delay hiding to allow clicks on history buttons
+    blurTimer.current = setTimeout(() => setShowHistory(false), 150)
+  }
+
   return (
     <div className="mb-8">
       <div className="flex gap-2 mb-4">
@@ -52,6 +67,8 @@ export default function ProductSearch({ initialProducts = [] }) {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={(e) => { if (e.key === 'Enter') runSearch(query) }}
+          onFocus={handleFocus}
+          onBlur={handleBlur}
           placeholder="Search products..."
           className="w-full border rounded px-3 py-2"
         />
@@ -59,9 +76,9 @@ export default function ProductSearch({ initialProducts = [] }) {
         <button onClick={() => { setQuery(''); setResults(initialProducts) }} className="bg-gray-200 px-4 py-2 rounded">Clear</button>
       </div>
 
-      {history.length > 0 && (
+      {showHistory && history.length > 0 && query.trim() === '' && (
         <div className="mb-4 text-sm text-gray-600">Recent searches: {history.map((h) => (
-          <button key={h} onClick={() => { setQuery(h); runSearch(h) }} className="underline mr-2">{h}</button>
+          <button key={h} onMouseDown={(e) => { e.preventDefault(); setQuery(h); runSearch(h); setShowHistory(false) }} className="underline mr-2">{h}</button>
         ))}</div>
       )}
 
