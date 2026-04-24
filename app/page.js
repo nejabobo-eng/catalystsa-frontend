@@ -26,8 +26,15 @@ export default async function Home() {
     })
     .slice(0, 5)
 
-  // All products - main catalog sorted by newest first
-  const allProducts = products.slice().sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0))
+  // All products - main catalog sorted by views desc, fallback to newest
+  const allProducts = products
+    .slice()
+    .sort((a, b) => {
+      const av = a.views_count || 0
+      const bv = b.views_count || 0
+      if (bv !== av) return bv - av
+      return new Date(b.created_at || 0) - new Date(a.created_at || 0)
+    })
 
   return (
     <main>
