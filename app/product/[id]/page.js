@@ -2,13 +2,19 @@ import { getProduct } from '@/lib/api'
 import { optimizeImage } from '@/lib/image'
 import ProductCard from '@/components/ProductCard'
 import Recommendations from '@/components/Recommendations'
+import dynamic from 'next/dynamic'
+
+const ViewTracker = dynamic(() => import('@/components/ViewTracker'), { ssr: false })
+import { useEffect } from 'react'
 
 export const dynamic = 'force-dynamic'
 
 export default async function ProductPage({ params }) {
   const product = await getProduct(params.id)
   if (!product) return <div className="p-8">Product not found</div>
-
+  // Note: we call the view endpoint on the client side via a small script
+  // because this file is server-rendered. We'll embed a tiny client script
+  // that fires a fetch to increment the view count.
   return (
     <main className="max-w-4xl mx-auto p-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -33,6 +39,7 @@ export default async function ProductPage({ params }) {
       </div>
 
       <section className="mt-12">
+        <ViewTracker productId={product.id} />
         <Recommendations productId={product.id} />
       </section>
     </main>
