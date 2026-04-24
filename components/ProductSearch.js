@@ -9,6 +9,7 @@ export default function ProductSearch({ initialProducts = [] }) {
   const [results, setResults] = useState([])
   const [history, setHistory] = useState([])
   const [showHistory, setShowHistory] = useState(false)
+  const [hasSearched, setHasSearched] = useState(false)
   const blurTimer = useRef(null)
 
   useEffect(() => {
@@ -35,6 +36,7 @@ export default function ProductSearch({ initialProducts = [] }) {
     const trimmed = (q || '').trim()
     if (!trimmed) {
       setResults([])
+      setHasSearched(false)
       return
     }
     const ql = trimmed.toLowerCase()
@@ -45,7 +47,14 @@ export default function ProductSearch({ initialProducts = [] }) {
       )
     })
     setResults(filtered)
+    setHasSearched(true)
     saveToHistory(trimmed)
+  }
+
+  function handleClear() {
+    setQuery('')
+    setResults([])
+    setHasSearched(false)
   }
 
   function handleFocus() {
@@ -83,13 +92,15 @@ export default function ProductSearch({ initialProducts = [] }) {
         ))}</div>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {results.length === 0 ? (
-          <div className="col-span-full text-center text-gray-500 py-8">No products found</div>
-        ) : (
-          results.map((product) => <ProductCard key={product.id} product={product} />)
-        )}
-      </div>
+      {hasSearched && results.length === 0 && (
+        <div className="col-span-full text-center text-gray-500 py-8">No products found</div>
+      )}
+
+      {results.length > 0 && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {results.map((product) => <ProductCard key={product.id} product={product} />)}
+        </div>
+      )}
     </div>
   )
 }
