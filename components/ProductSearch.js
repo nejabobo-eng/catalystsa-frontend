@@ -5,7 +5,8 @@ import ProductCard from './ProductCard'
 
 export default function ProductSearch({ initialProducts = [] }) {
   const [query, setQuery] = useState('')
-  const [results, setResults] = useState(initialProducts)
+  // Do not show full product list by default - only show results after a search
+  const [results, setResults] = useState([])
   const [history, setHistory] = useState([])
   const [showHistory, setShowHistory] = useState(false)
   const blurTimer = useRef(null)
@@ -33,7 +34,7 @@ export default function ProductSearch({ initialProducts = [] }) {
   function runSearch(q) {
     const trimmed = (q || '').trim()
     if (!trimmed) {
-      setResults(initialProducts)
+      setResults([])
       return
     }
     const ql = trimmed.toLowerCase()
